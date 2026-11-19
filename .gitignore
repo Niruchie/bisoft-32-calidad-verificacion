@@ -1,0 +1,21 @@
+target/
+*.class
+*.jar
+*.war
+
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+.DS_Store
+Thumbs.db
+
+*.log
+.env
+
+BISOFT32_Proyecto_Final (2).pdf
+PLAN.md
+AMMEND.md
