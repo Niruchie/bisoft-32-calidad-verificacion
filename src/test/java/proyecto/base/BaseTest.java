@@ -36,4 +36,13 @@ public abstract class BaseTest {
         loginPage.login(username, password);
         return new InventoryPage(driver);
     }
+
+    /**
+     * Navega a una ruta del sitio sin pasar por la UI.
+     * Se usa para verificar control de acceso (CP-010), no para probar navegacion.
+     */
+    protected void openPath(String path) {
+        String base = LoginPage.URL.replaceAll("/$", "");
+        driver.get(base + "/" + path.replaceFirst("^/", ""));
+    }
 }
