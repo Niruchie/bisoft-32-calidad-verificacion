@@ -5,17 +5,17 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>cr.ucenfotec.bisoft32</groupId>
-  <artifactId>pom-saucedemo</artifactId>
+  <artifactId>proyecto-pruebas</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
-  <name>BISOFT-32 - Page Object Model - SauceDemo</name>
-  <description>Refactorizacion a Page Object Model del SeleniumTest visto en clase (28/10/2026).</description>
+  <name>BISOFT-32 - Proyecto final</name>
+  <description>Automatizacion de pruebas de Swag Labs con Selenium 4, JUnit 5 y Page Object Model.</description>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <selenium.version>4.52.0</selenium.version>
-    <testng.version>7.12.0</testng.version>
+    <junit.version>5.10.3</junit.version>
   </properties>
 
   <dependencies>
@@ -26,9 +26,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>${testng.version}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -39,11 +39,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.2</version>
-        <configuration>
-          <suiteXmlFiles>
-            <suiteXmlFile>testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
       </plugin>
     </plugins>
   </build>
