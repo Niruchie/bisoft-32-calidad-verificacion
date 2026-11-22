@@ -16,6 +16,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <selenium.version>4.52.0</selenium.version>
     <junit.version>5.10.3</junit.version>
+    <groups></groups>
+    <excludedGroups>defecto</excludedGroups>
   </properties>
 
   <dependencies>
@@ -39,7 +41,21 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.2</version>
+        <configuration>
+          <groups>${groups}</groups>
+          <excludedGroups>${excludedGroups}</excludedGroups>
+        </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>defectos</id>
+      <properties>
+        <groups>defecto</groups>
+        <excludedGroups></excludedGroups>
+      </properties>
+    </profile>
+  </profiles>
 </project>

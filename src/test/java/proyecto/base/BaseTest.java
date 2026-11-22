@@ -34,7 +34,9 @@ public abstract class BaseTest {
      */
     protected InventoryPage loginAs(String username, String password) {
         loginPage.login(username, password);
-        return new InventoryPage(driver);
+        InventoryPage inventory = new InventoryPage(driver);
+        inventory.isLoaded();
+        return inventory;
     }
 
     /**
