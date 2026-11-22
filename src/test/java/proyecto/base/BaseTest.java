@@ -2,6 +2,7 @@ package proyecto.base;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import proyecto.core.DriverFactory;
 import proyecto.pages.InventoryPage;
@@ -12,14 +13,20 @@ import proyecto.pages.LoginPage;
  * un navegador nuevo por cada test, login abierto y cierre al final.
  */
 public abstract class BaseTest {
-
     protected WebDriver driver;
     protected LoginPage loginPage;
 
     @BeforeEach
     void setUp() {
         driver = DriverFactory.create();
-        loginPage = new LoginPage(driver).open();
+        driver.get(LoginPage.URL);
+        driver.manage().deleteAllCookies();
+        ((JavascriptExecutor) driver).executeScript("""
+            window.sessionStorage.clear();
+            window.localStorage.clear();
+        """);
+        driver.get(LoginPage.URL);
+        loginPage = new LoginPage(driver);
     }
 
     @AfterEach
@@ -35,7 +42,16 @@ public abstract class BaseTest {
     protected InventoryPage loginAs(String username, String password) {
         loginPage.login(username, password);
         InventoryPage inventory = new InventoryPage(driver);
-        inventory.isLoaded();
+        if (!inventory.isLoaded()) {
+            throw new IllegalStateException("No se pudo iniciar sesion como " + username);
+        }
+
+        // Recarga para asegurar que React hidrato los handlers de la pagina.
+        driver.navigate().refresh();
+        inventory = new InventoryPage(driver);
+        if (!inventory.isLoaded()) {
+            throw new IllegalStateException("El inventario no cargo tras recargar: " + username);
+        }
         return inventory;
     }
 

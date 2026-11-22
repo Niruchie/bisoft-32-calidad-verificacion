@@ -179,9 +179,9 @@ public class InventoryTest extends BaseTest {
         inventory.addToCart(TestProducts.BACKPACK);
 
         ProductDetailPage detail = inventory.openProduct(TestProducts.BACKPACK);
-        detail.backToProducts();
-
-        assertEquals(TestProducts.ONE_ITEM, inventory.getCartCount(), "El carrito no se conservo al volver");
+        InventoryPage back = detail.backToProducts();
+        assertTrue(back.isLoaded(), "No se regreso al inventario");
+        assertEquals(TestProducts.ONE_ITEM, back.getCartCount(), "El carrito no se conservo al volver");
     }
 
     // [CP-028] problem_user: integridad del inventario
@@ -190,8 +190,7 @@ public class InventoryTest extends BaseTest {
     @Tag("defecto")
     @DisplayName("CP-028 problem_user: integridad del inventario")
     void problemUserInventoryIntegrity() {
-        loginPage.login(TestUsers.PROBLEM, TestUsers.PASSWORD);
-        InventoryPage inventory = new InventoryPage(driver);
+        InventoryPage inventory = loginAs(TestUsers.PROBLEM, TestUsers.PASSWORD);
         assertTrue(inventory.isLoaded(), "El inventario de problem_user no cargo");
         List<String> images = inventory.getImageSrcs();
 

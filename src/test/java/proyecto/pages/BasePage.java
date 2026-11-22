@@ -2,6 +2,7 @@ package proyecto.pages;
 
 import java.time.Duration;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -40,6 +41,21 @@ public abstract class BasePage {
         wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
     }
 
+    /**
+     * Hace clic solo si el elemento esta realmente clickable.
+     * Si no, lanza ElementNotInteractableException para que el FluentWait reintente.
+     */
+    protected void clickIfClickable(By locator) {
+        clickIfClickable(driver.findElement(locator));
+    }
+
+    protected void clickIfClickable(WebElement element) {
+        if (ExpectedConditions.elementToBeClickable(element).apply(driver) == null) {
+            throw new ElementNotInteractableException("Elemento no clickable");
+        }
+        element.click();
+    }
+
     protected void type(By locator, String text) {
         WebElement element = visible(locator);
         element.clear();
@@ -56,6 +72,14 @@ public abstract class BasePage {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Chequeo inmediato, sin espera. Se usa como condicion dentro de FluentWait.
+     */
+    protected boolean isVisibleNow(By locator) {
+        return driver.findElements(locator).stream()
+                .anyMatch(WebElement::isDisplayed);
     }
 
     protected void waitForUrlContains(String fragment) {

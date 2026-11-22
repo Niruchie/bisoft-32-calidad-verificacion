@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import proyecto.base.BaseTest;
 import proyecto.data.TestUsers;
+import proyecto.pages.InventoryPage;
 
 public class LoginTest extends BaseTest {
 
@@ -28,7 +29,7 @@ public class LoginTest extends BaseTest {
     @Test
     @DisplayName("CP-010 Acceso directo a inventario sin sesion")
     void directInventoryAccessWithoutSessionIsRejected() {
-        openPath("/inventory.html");
+        openPath(InventoryPage.PATH);
 
         assertEquals(
                 "Epic sadface: You can only access '/inventory.html' when you are logged in.",

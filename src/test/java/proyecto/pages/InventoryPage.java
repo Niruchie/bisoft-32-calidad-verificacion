@@ -1,16 +1,24 @@
 package proyecto.pages;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.List;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
 import proyecto.extension.AttributeBy;
 
 @SuppressWarnings("null")
 public class InventoryPage extends BasePage {
+
+    public static final String PATH = "inventory.html";
 
     public enum SortOption {
         NAME_ASC("az"),
@@ -48,6 +56,10 @@ public class InventoryPage extends BasePage {
         return isVisible(inventoryContainer) && isVisible(inventoryItem);
     }
 
+    public boolean isLoadedNow() {
+        return isVisibleNow(inventoryContainer) && isVisibleNow(inventoryItem);
+    }
+
     public List<String> getProductNames() {
         return driver.findElements(itemName).stream()
                 .map(WebElement::getText)
@@ -77,19 +89,43 @@ public class InventoryPage extends BasePage {
     }
 
     public void addToCart(String productName) {
-        actionButton(itemByName(productName), "add-to-cart").click();
+        new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(20))
+                .pollingEvery(Duration.ofSeconds(2))
+                .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
+                .withMessage("No se pudo agregar al carrito: " + productName)
+                .until(d -> {
+                    if (isButtonVisibleNow(productName, "remove")) {
+                        return true;
+                    }
+                    clickButton(productName, "add-to-cart");
+                    return isButtonVisibleNow(productName, "remove");
+                });
     }
 
     public void removeFromCart(String productName) {
-        actionButton(itemByName(productName), "remove").click();
+        new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(20))
+                .pollingEvery(Duration.ofSeconds(2))
+                .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
+                .withMessage("No se pudo quitar del carrito: " + productName)
+                .until(d -> {
+                    if (isButtonVisibleNow(productName, "add-to-cart")) {
+                        return true;
+                    }
+                    clickButton(productName, "remove");
+                    return isButtonVisibleNow(productName, "add-to-cart");
+                });
     }
 
     public boolean isAddButtonVisible(String productName) {
-        return hasButton(itemByName(productName), "add-to-cart");
+        return isButtonVisibleNow(productName, "add-to-cart");
     }
 
     public boolean isRemoveButtonVisible(String productName) {
-        return hasButton(itemByName(productName), "remove");
+        return isButtonVisibleNow(productName, "remove");
     }
 
     public int getCartCount() {
@@ -100,9 +136,35 @@ public class InventoryPage extends BasePage {
         return header.isBadgeVisible();
     }
 
+    public HeaderComponent header() {
+        return header;
+    }
+
     public ProductDetailPage openProduct(String productName) {
-        itemByName(productName).findElement(itemName).click();
+        WebElement marker = itemByName(productName).findElement(itemName);
+        new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(20))
+                .pollingEvery(Duration.ofSeconds(2))
+                .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
+                .withMessage("No se abrio el detalle de: " + productName)
+                .until(d -> {
+                    if (ExpectedConditions.stalenessOf(marker).apply(d)) {
+                        return true;
+                    }
+                    clickIfClickable(marker);
+                    return false;
+                });
         return new ProductDetailPage(driver);
+    }
+
+    private boolean isButtonVisibleNow(String productName, String prefix) {
+        try {
+            return itemByName(productName).findElements(By.tagName("button")).stream()
+                    .anyMatch(button -> hasTestId(button, prefix) && button.isDisplayed());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private WebElement itemByName(String productName) {
@@ -112,16 +174,12 @@ public class InventoryPage extends BasePage {
                 .orElseThrow(() -> new NoSuchElementException("Producto no encontrado: " + productName));
     }
 
-    private WebElement actionButton(WebElement item, String prefix) {
-        return item.findElements(By.tagName("button")).stream()
-                .filter(button -> hasTestId(button, prefix))
+    private void clickButton(String productName, String prefix) {
+        WebElement button = itemByName(productName).findElements(By.tagName("button")).stream()
+                .filter(element -> hasTestId(element, prefix) && element.isDisplayed())
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Boton no encontrado: " + prefix));
-    }
-
-    private boolean hasButton(WebElement item, String prefix) {
-        return item.findElements(By.tagName("button")).stream()
-                .anyMatch(button -> hasTestId(button, prefix) && button.isDisplayed());
+        clickIfClickable(button);
     }
 
     private boolean hasTestId(WebElement button, String prefix) {
