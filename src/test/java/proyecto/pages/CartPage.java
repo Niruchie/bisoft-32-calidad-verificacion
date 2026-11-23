@@ -103,21 +103,26 @@ public class CartPage extends BasePage {
         return new InventoryPage(driver);
     }
 
-    public void checkout() {
-        String before = driver.getCurrentUrl();
+    public CheckoutStepOnePage checkout() {
+        CheckoutStepOnePage stepOne = new CheckoutStepOnePage(driver);
         new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(20))
                 .pollingEvery(Duration.ofSeconds(2))
                 .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
                 .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
-                .withMessage("El checkout no avanzo desde " + before)
+                .withMessage("No se pudo abrir el checkout")
                 .until(d -> {
-                    if (!d.getCurrentUrl().equals(before)) {
+                    if (stepOne.isLoadedNow()) {
                         return true;
                     }
                     clickIfClickable(checkout);
-                    return !d.getCurrentUrl().equals(before);
+                    return false;
                 });
+        return stepOne;
+    }
+
+    public void clickCheckout() {
+        clickIfClickable(checkout);
     }
 
     private WebElement itemByName(String productName) {

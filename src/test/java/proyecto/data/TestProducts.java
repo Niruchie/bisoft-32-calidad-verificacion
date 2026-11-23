@@ -11,6 +11,7 @@ public final class TestProducts {
     public static final int COUNT = 6;
     public static final int EMPTY_CART = 0;
     public static final int ONE_ITEM = 1;
+    public static final int TWO_ITEMS = 2;
     public static final int THREE_ITEMS = 3;
 
     public static final String BACKPACK = "Sauce Labs Backpack";

@@ -80,10 +80,9 @@ public class CartTest extends BaseTest {
         CartPage cart = inventory.header().openCart();
 
         assertEquals(0, cart.getItemCount(), "El carrito deberia estar vacio");
-        cart.checkout();
+        cart.clickCheckout();
 
-        assertTrue(cart.getCurrentUrl().contains(CartPage.PATH),
-                "El checkout con carrito vacio no se bloqueo");
+        assertTrue(cart.isLoadedNow(), "El checkout con carrito vacio no se bloqueo");
     }
 
     // [CP-033] Carrito se vacia tras logout/login
