@@ -18,6 +18,9 @@
     <junit.version>5.10.3</junit.version>
     <groups></groups>
     <excludedGroups>defecto</excludedGroups>
+    <report.kind>execution</report.kind>
+    <run.folder></run.folder>
+    <runfolder></runfolder>
   </properties>
 
   <dependencies>
@@ -33,6 +36,13 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.aventstack</groupId>
+      <artifactId>extentreports</artifactId>
+      <version>5.1.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -44,6 +54,11 @@
         <configuration>
           <groups>${groups}</groups>
           <excludedGroups>${excludedGroups}</excludedGroups>
+          <systemPropertyVariables>
+            <report.kind>${report.kind}</report.kind>
+            <run.folder>${run.folder}</run.folder>
+            <runfolder>${runfolder}</runfolder>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
@@ -55,6 +70,7 @@
       <properties>
         <groups>defecto</groups>
         <excludedGroups></excludedGroups>
+        <report.kind>defect</report.kind>
       </properties>
     </profile>
   </profiles>

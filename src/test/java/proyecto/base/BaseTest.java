@@ -2,16 +2,21 @@ package proyecto.base;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import proyecto.core.DriverFactory;
 import proyecto.pages.InventoryPage;
 import proyecto.pages.LoginPage;
+import proyecto.report.TestReportExtension;
 
 /**
  * Ciclo de vida comun de todas las pruebas:
  * un navegador nuevo por cada test, login abierto y cierre al final.
  */
+@ExtendWith(TestReportExtension.class)
 public abstract class BaseTest {
     protected WebDriver driver;
     protected LoginPage loginPage;
@@ -32,6 +37,21 @@ public abstract class BaseTest {
     @AfterEach
     void tearDown() {
         DriverFactory.quit(driver);
+    }
+
+    /**
+     * Captura para el reporte cuando un test falla.
+     * Se llama desde el listener antes de que @AfterEach cierre el navegador.
+     */
+    public byte[] captureScreenshot() {
+        if (driver == null) {
+            return null;
+        }
+        try {
+            return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

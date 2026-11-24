@@ -2,6 +2,7 @@ package proyecto.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -9,6 +10,7 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import proyecto.config.Config;
 
 /**
  * Crea y cierra el navegador.
@@ -21,8 +23,8 @@ public final class DriverFactory {
     }
 
     public static WebDriver create() {
-        String browser = System.getProperty("browser", "chrome").toLowerCase();
-        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
+        String browser = Config.get("browser", "chrome").toLowerCase(Locale.ROOT);
+        boolean headless = Config.getBoolean("headless", false);
 
         WebDriver driver = switch (browser) {
             case "firefox" -> createFirefox(headless);

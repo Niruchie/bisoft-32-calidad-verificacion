@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import proyecto.report.TestReportExtension;
 
+@ExtendWith(TestReportExtension.class)
 class AttributeByTest {
-
     @Test
     @DisplayName("AttributeBy.test usa data-test")
     void testUsesDataTestAttribute() {
