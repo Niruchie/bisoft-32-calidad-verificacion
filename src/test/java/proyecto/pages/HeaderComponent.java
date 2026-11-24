@@ -11,7 +11,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import proyecto.extension.AttributeBy;
 
 /**
@@ -21,9 +20,11 @@ import proyecto.extension.AttributeBy;
 public class HeaderComponent {
 
     private final WebDriver driver;
-    private final WebDriverWait wait;
+    private final Duration waitTimeout;
+    private final By menuWrap = By.className("bm-menu-wrap");
     private final By logoutLink = By.id("logout_sidebar_link");
     private final By menuButton = By.id("react-burger-menu-btn");
+    private final By resetAppStateLink = By.id("reset_sidebar_link");
     private final By closeMenuButton = By.id("react-burger-cross-btn");
     private final By badge = AttributeBy.test("shopping-cart-badge");
     private final By cartLink = AttributeBy.test("shopping-cart-link");
@@ -31,7 +32,7 @@ public class HeaderComponent {
     public HeaderComponent(WebDriver driver) {
         this.driver = driver;
         long seconds = Long.parseLong(System.getProperty("explicit.wait.seconds", "10"));
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
+        this.waitTimeout = Duration.ofSeconds(seconds);
     }
 
     public int getBadgeCount() {
@@ -66,12 +67,83 @@ public class HeaderComponent {
         return cart;
     }
 
-    public void openMenu() {
-        click(menuButton);
+    public HeaderComponent openMenu() {
+        new FluentWait<>(driver)
+                .withTimeout(waitTimeout)
+                .pollingEvery(Duration.ofMillis(200))
+                .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
+                .withMessage("No se pudo abrir el menu")
+                .until(d -> {
+                    if (isMenuOpenNow()) {
+                        return true;
+                    }
+                    clickIfClickable(menuButton);
+                    return isMenuOpenNow();
+                });
+        return this;
     }
 
-    public void closeMenu() {
-        click(closeMenuButton);
+    public HeaderComponent closeMenu() {
+        new FluentWait<>(driver)
+                .withTimeout(waitTimeout)
+                .pollingEvery(Duration.ofMillis(200))
+                .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
+                .withMessage("No se pudo cerrar el menu")
+                .until(d -> {
+                    if (isMenuClosedNow()) {
+                        return true;
+                    }
+                    clickIfClickable(closeMenuButton);
+                    return isMenuClosedNow();
+                });
+        return this;
+    }
+
+    /**
+     * Reinicia el estado de la aplicacion desde el menu.
+     */
+    public HeaderComponent resetAppState() {
+        openMenu();
+        new FluentWait<>(driver)
+                .withTimeout(waitTimeout)
+                .pollingEvery(Duration.ofMillis(200))
+                .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                .ignoring(ElementClickInterceptedException.class, ElementNotInteractableException.class)
+                .withMessage("No se pudo reiniciar el estado de la aplicacion")
+                .until(d -> {
+                    if (getBadgeCount() == 0) {
+                        return true;
+                    }
+                    clickIfClickable(resetAppStateLink);
+                    return getBadgeCount() == 0;
+                });
+        if (isMenuOpenNow()) {
+            closeMenu();
+        }
+        return this;
+    }
+
+    public boolean isMenuOpen() {
+        return isMenuOpenNow();
+    }
+
+    public boolean isMenuClosed() {
+        return isMenuClosedNow();
+    }
+
+    private boolean isMenuOpenNow() {
+        return hasAriaHidden("false");
+    }
+
+    private boolean isMenuClosedNow() {
+        return hasAriaHidden("true");
+    }
+
+    private boolean hasAriaHidden(String value) {
+        List<WebElement> wraps = driver.findElements(menuWrap);
+        return !wraps.isEmpty() && value.equals(wraps.get(0).getAttribute("aria-hidden"));
     }
 
     public LoginPage logout() {
@@ -107,9 +179,5 @@ public class HeaderComponent {
     private boolean isDisplayedNow(By locator) {
         List<WebElement> elements = driver.findElements(locator);
         return !elements.isEmpty() && elements.get(0).isDisplayed();
-    }
-
-    private void click(By locator) {
-        wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
     }
 }
